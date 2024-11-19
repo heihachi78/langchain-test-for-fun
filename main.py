@@ -1,17 +1,17 @@
 from langchain.prompts import PromptTemplate
-from localollamallm import LocalOllamaLLM
+from langchain_core.output_parsers import StrOutputParser
+from langchain_community.llms.ollama import Ollama
+import streamlit as sl
 
-# Initialize the local Ollama language model with the API URL and model name
-local_ollama_llm = LocalOllamaLLM(api_url="http://localhost:11434", model_name="llama3.2:latest")
-
-# Define a prompt template
 template = "You are a helpful assistant. Answer the following question: {question}"
 prompt = PromptTemplate(template=template, input_variables=["question"])
+llm = Ollama(model="llama3.2:latest", base_url="http://localhost:11434")
 
-# Create a chain object
-chain = prompt | local_ollama_llm
+sl.title("Local Ollama LLM")
+question = sl.text_input("Ask me a question:")
 
-# Get user input and generate response
-question = input("Ask me a question: ")
-response = chain.invoke({"question": question})
-print(response)
+outpur_parser = StrOutputParser()
+chain = prompt | llm | outpur_parser
+
+if question:
+    sl.write(chain.invoke({"question": question}))
